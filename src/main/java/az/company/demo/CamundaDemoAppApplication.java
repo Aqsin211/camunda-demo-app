@@ -1,4 +1,4 @@
-package az.company.camundademoapp;
+package az.company.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
