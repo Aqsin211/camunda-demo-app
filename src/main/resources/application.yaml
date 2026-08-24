@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: camunda-demo-app
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/camunda_demo
+    username: postgres
+    password: Postgres1234567890
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+camunda:
+  bpm:
+    database:
+      type: postgres
+    history-level: full
+    authorization:
+      enabled: true
+    admin-user:
+      id: admin
+      password: admin
+      first-name: Admin
+      last-name: User
+      email: admin@example.com
+
+server:
+  port: 8080
