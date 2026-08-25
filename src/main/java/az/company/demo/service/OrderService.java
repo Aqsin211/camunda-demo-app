@@ -9,24 +9,28 @@ import az.company.demo.exception.InvalidOrderException;
 import az.company.demo.exception.OrderNotFoundException;
 import az.company.demo.model.dto.request.CreateOrderRequest;
 import az.company.demo.model.dto.request.OrderItemRequest;
+import az.company.demo.model.dto.response.OrderResponse;
 import az.company.demo.model.enums.OrderStatus;
-import lombok.RequiredArgsConstructor;
+import az.company.demo.model.mapper.OrderMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Service
-@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
 
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+    }
+
     @Transactional
-    public Order createOrder(CreateOrderRequest request) {
+    public OrderResponse createOrder(CreateOrderRequest request) {
 
         if (request.items().isEmpty()) {
             throw new InvalidOrderException(
@@ -71,11 +75,22 @@ public class OrderService {
 
         order.setTotalAmount(total);
 
-        return orderRepository.save(order);
+        return OrderMapper.toResponse(orderRepository.save(order));
     }
 
     @Transactional(readOnly = true)
-    public Order getById(Long orderId) {
+    public OrderResponse getById(Long orderId) {
+
+        return orderRepository.findById(orderId)
+                .map(OrderMapper::toResponse)
+                .orElseThrow(() ->
+                        new OrderNotFoundException(orderId)
+                );
+    }
+
+    @Transactional(readOnly = true)
+    public Order getEntityById(Long orderId) {
+
         return orderRepository.findById(orderId)
                 .orElseThrow(() ->
                         new OrderNotFoundException(orderId)
@@ -85,7 +100,7 @@ public class OrderService {
     @Transactional
     public void validateOrder(Long orderId) {
 
-        Order order = getById(orderId);
+        Order order = getEntityById(orderId);
 
         if (order.getItems().isEmpty()) {
             throw new InvalidOrderException(
@@ -99,7 +114,7 @@ public class OrderService {
     @Transactional
     public void cancelOrder(Long orderId) {
 
-        Order order = getById(orderId);
+        Order order = getEntityById(orderId);
 
         order.setStatus(OrderStatus.CANCELLED);
     }

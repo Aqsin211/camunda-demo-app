@@ -6,15 +6,17 @@ import az.company.demo.dao.entity.Product;
 import az.company.demo.dao.repository.ProductRepository;
 import az.company.demo.exception.InsufficientStockException;
 import az.company.demo.exception.ProductNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class InventoryService {
 
     private final ProductRepository productRepository;
+
+    public InventoryService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     @Transactional(readOnly = true)
     public boolean isStockAvailable(Order order) {

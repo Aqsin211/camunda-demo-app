@@ -1,12 +1,20 @@
 package az.company.demo.exception.model;
 
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-public record ErrorResponse(
-        LocalDateTime timestamp,
-        int status,
-        String error,
-        String message,
-        String path
-) {
+import java.time.OffsetDateTime;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+public class ErrorResponse {
+
+    private int status;
+    private String error;
+    private String message;
+    private OffsetDateTime timestamp;
 }

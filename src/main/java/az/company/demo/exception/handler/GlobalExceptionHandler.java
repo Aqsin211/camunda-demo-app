@@ -5,80 +5,80 @@ import az.company.demo.exception.InvalidOrderException;
 import az.company.demo.exception.OrderNotFoundException;
 import az.company.demo.exception.ProductNotFoundException;
 import az.company.demo.exception.model.ErrorResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import az.company.demo.model.enums.ErrorMessages;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleOrderNotFound(
-            OrderNotFoundException exception,
-            HttpServletRequest request
-    ) {
-        return buildError(
-                HttpStatus.NOT_FOUND,
-                exception,
-                request
-        );
+    public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(ErrorMessages.NOT_FOUND.getMessage())
+                .message(exception.getMessage())
+                .timestamp(OffsetDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ProductNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleProductNotFound(
-            ProductNotFoundException exception,
-            HttpServletRequest request
-    ) {
-        return buildError(
-                HttpStatus.NOT_FOUND,
-                exception,
-                request
-        );
-    }
-
-    @ExceptionHandler(InsufficientStockException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleInsufficientStock(
-            InsufficientStockException exception,
-            HttpServletRequest request
-    ) {
-        return buildError(
-                HttpStatus.CONFLICT,
-                exception,
-                request
-        );
+    public ResponseEntity<ErrorResponse> handleProductNotFound(ProductNotFoundException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(ErrorMessages.NOT_FOUND.getMessage())
+                .message(exception.getMessage())
+                .timestamp(OffsetDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InvalidOrderException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInvalidOrder(
-            InvalidOrderException exception,
-            HttpServletRequest request
-    ) {
-        return buildError(
-                HttpStatus.BAD_REQUEST,
-                exception,
-                request
-        );
+    public ResponseEntity<ErrorResponse> handleInvalidOrder(InvalidOrderException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(ErrorMessages.BAD_REQUEST.getMessage())
+                .message(exception.getMessage())
+                .timestamp(OffsetDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    private ErrorResponse buildError(
-            HttpStatus status,
-            Exception exception,
-            HttpServletRequest request
-    ) {
-        return new ErrorResponse(
-                LocalDateTime.now(),
-                status.value(),
-                status.getReasonPhrase(),
-                exception.getMessage(),
-                request.getRequestURI()
-        );
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientStock(InsufficientStockException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(ErrorMessages.INSUFFICIENT_STOCK.getMessage())
+                .message(exception.getMessage())
+                .timestamp(OffsetDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(ErrorMessages.BAD_REQUEST.getMessage())
+                .message(exception.getMessage())
+                .timestamp(OffsetDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception exception) {
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(ErrorMessages.INTERNAL_SERVER_ERROR.getMessage())
+                .message(exception.getMessage())
+                .timestamp(OffsetDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

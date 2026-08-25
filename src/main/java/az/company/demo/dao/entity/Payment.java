@@ -3,9 +3,13 @@ package az.company.demo.dao.entity;
 import az.company.demo.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PRIVATE;
 
 @Entity
 @Table(name = "payments")
@@ -14,24 +18,26 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class Payment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = IDENTITY)
+    Long id;
 
-    @Column(nullable = false, unique = true)
-    private Long orderId;
+    @Column(nullable = false, unique = true, name = "order_id")
+    Long orderId;
 
     @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal amount;
+    BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status;
+    PaymentStatus status;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @Column(nullable = false, name = "created_at")
+    LocalDateTime createdAt;
 
-    private LocalDateTime paidAt;
+    @Column(name = "paid_at")
+    LocalDateTime paidAt;
 }

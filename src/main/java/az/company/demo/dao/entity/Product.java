@@ -2,8 +2,12 @@ package az.company.demo.dao.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PRIVATE;
 
 @Entity
 @Table(name = "products")
@@ -12,18 +16,19 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = IDENTITY)
+    Long id;
 
     @Column(nullable = false)
-    private String name;
+    String name;
 
     @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal price;
+    BigDecimal price;
 
-    @Column(nullable = false)
-    private Integer stockQuantity;
+    @Column(nullable = false, name = "stock_quantity")
+    Integer stockQuantity;
 }

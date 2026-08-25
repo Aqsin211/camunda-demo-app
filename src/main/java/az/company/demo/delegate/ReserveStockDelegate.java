@@ -20,7 +20,7 @@ public class ReserveStockDelegate implements JavaDelegate {
 
         Long orderId = (Long) execution.getVariable("orderId");
 
-        Order order = orderService.getById(orderId);
+        Order order = orderService.getEntityById(orderId);
 
         inventoryService.reserveStock(order);
     }

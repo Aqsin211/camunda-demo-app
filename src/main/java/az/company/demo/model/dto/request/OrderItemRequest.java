@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 public record OrderItemRequest(
 
         @NotNull
+        @Positive
         Long productId,
 
         @NotNull
