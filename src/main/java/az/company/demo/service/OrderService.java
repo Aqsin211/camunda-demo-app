@@ -12,6 +12,10 @@ import az.company.demo.model.dto.request.OrderItemRequest;
 import az.company.demo.model.dto.response.OrderResponse;
 import az.company.demo.model.enums.OrderStatus;
 import az.company.demo.model.mapper.OrderMapper;
+import az.company.demo.process.ProcessVariables;
+import org.camunda.bpm.engine.RuntimeService;
+import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.engine.variable.Variables;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +25,18 @@ import java.time.LocalDateTime;
 @Service
 public class OrderService {
 
+    private static final String PROCESS_DEFINITION_KEY = "Process_0diemk0";
+
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final RuntimeService runtimeService;
 
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
+    public OrderService(OrderRepository orderRepository,
+                        ProductRepository productRepository,
+                        RuntimeService runtimeService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.runtimeService = runtimeService;
     }
 
     @Transactional
@@ -75,7 +85,24 @@ public class OrderService {
 
         order.setTotalAmount(total);
 
-        return OrderMapper.toResponse(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+
+        startProcessInstance(saved);
+
+        return OrderMapper.toResponse(saved);
+    }
+
+    private void startProcessInstance(Order order) {
+
+        ProcessInstance instance = runtimeService.startProcessInstanceByKey(
+                PROCESS_DEFINITION_KEY,
+                order.getId().toString(),
+                Variables.putValue(ProcessVariables.ORDER_ID, order.getId())
+                        .putValue(ProcessVariables.TOTAL_AMOUNT, order.getTotalAmount().doubleValue())
+        );
+
+        order.setProcessInstanceId(instance.getId());
+        orderRepository.save(order);
     }
 
     @Transactional(readOnly = true)
@@ -117,5 +144,13 @@ public class OrderService {
         Order order = getEntityById(orderId);
 
         order.setStatus(OrderStatus.CANCELLED);
+    }
+
+    @Transactional
+    public void updateStatus(Long orderId, OrderStatus status) {
+
+        Order order = getEntityById(orderId);
+
+        order.setStatus(status);
     }
 }

@@ -61,4 +61,14 @@ public class InventoryService {
             productRepository.save(product);
         }
     }
+
+    @Transactional
+    public void releaseStock(Order order) {
+        for (OrderItem item : order.getItems()) {
+            Product product = productRepository.findById(item.getProduct().getId())
+                    .orElseThrow(() -> new ProductNotFoundException(item.getProduct().getId()));
+            product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+            productRepository.save(product);
+        }
+    }
 }

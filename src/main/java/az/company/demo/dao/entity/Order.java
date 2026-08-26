@@ -41,6 +41,9 @@ public class Order {
     @Column(nullable = false, name = "created_at")
     LocalDateTime createdAt;
 
+    @Column(name = "process_instance_id")
+    String processInstanceId;
+
     @OneToMany(
             mappedBy = "order",
             cascade = CascadeType.ALL,
