@@ -5,11 +5,11 @@
     <bpmn:startEvent id="Event_1fa6yb9" name="Order Created">
       <bpmn:outgoing>Flow_00bl366</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_0vm7o0l" name="Validate Order" camunda:class="validateOrderDelegate">
+    <bpmn:serviceTask id="Activity_0vm7o0l" name="Validate Order" camunda:delegateExpression="${validateOrderDelegate}">
       <bpmn:incoming>Flow_00bl366</bpmn:incoming>
       <bpmn:outgoing>Flow_1pqu4z4</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_0gmxpui" name="Check stock" camunda:class="checkStockDelegate">
+    <bpmn:serviceTask id="Activity_0gmxpui" name="Check stock" camunda:delegateExpression="${checkStockDelegate}">
       <bpmn:incoming>Flow_1pqu4z4</bpmn:incoming>
       <bpmn:outgoing>Flow_1b30rl2</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -18,7 +18,7 @@
       <bpmn:outgoing>Flow_0kvmjz8</bpmn:outgoing>
       <bpmn:outgoing>Flow_049efge</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Activity_03k1005" name="Cancel Order" camunda:class="cancelOrderDelegate">
+    <bpmn:serviceTask id="Activity_03k1005" name="Cancel Order" camunda:delegateExpression="${cancelOrderDelegate}">
       <bpmn:incoming>Flow_049efge</bpmn:incoming>
       <bpmn:incoming>Flow_0bel3s9</bpmn:incoming>
       <bpmn:incoming>Flow_1r7wri1</bpmn:incoming>
@@ -29,7 +29,7 @@
     <bpmn:endEvent id="Event_1l4y8ps" name="Order canceled">
       <bpmn:incoming>Flow_1la9h0s</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="Activity_0r4mn26" name="Reserve Stock" camunda:class="reserveStockDelegate">
+    <bpmn:serviceTask id="Activity_0r4mn26" name="Reserve Stock" camunda:delegateExpression="${reserveStockDelegate}">
       <bpmn:incoming>Flow_0kvmjz8</bpmn:incoming>
       <bpmn:outgoing>Flow_022vx7c</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -55,7 +55,7 @@
       <bpmn:outgoing>Flow_1w0n4z8</bpmn:outgoing>
       <bpmn:outgoing>Flow_0kzc94y</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Activity_0r8on93" name="Prepare Payment" camunda:class="preparePaymentDelegate">
+    <bpmn:serviceTask id="Activity_0r8on93" name="Prepare Payment" camunda:delegateExpression="${preparePaymentDelegate}">
       <bpmn:incoming>Flow_1dxivbg</bpmn:incoming>
       <bpmn:incoming>Flow_0kzc94y</bpmn:incoming>
       <bpmn:outgoing>Flow_0g7svvc</bpmn:outgoing>
@@ -78,7 +78,7 @@
       <bpmn:outgoing>Flow_1r7wri1</bpmn:outgoing>
       <bpmn:outgoing>Flow_1rcvrip</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Activity_0uhoqic" name="Prepare Shipment" camunda:class="prepareShipmentDelegate">
+    <bpmn:serviceTask id="Activity_0uhoqic" name="Prepare Shipment" camunda:delegateExpression="${prepareShipmentDelegate}">
       <bpmn:incoming>Flow_1rcvrip</bpmn:incoming>
       <bpmn:outgoing>Flow_069miif</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -164,6 +164,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_19ps4v4_di" bpmnElement="Activity_19ps4v4">
         <dc:Bounds x="860" y="200" width="130" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1gnrn44" bpmnElement="Gateway_1wduqsr" isMarkerVisible="true">
         <dc:Bounds x="1015" y="215" width="50" height="50" />

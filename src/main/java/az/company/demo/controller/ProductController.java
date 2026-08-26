@@ -5,13 +5,7 @@ import az.company.demo.model.dto.response.ProductResponse;
 import az.company.demo.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -38,7 +32,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProduct(@RequestHeader Long id){
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 }

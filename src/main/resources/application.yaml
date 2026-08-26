@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/camunda_demo
     username: postgres
-    password: Postgres1234567890
+    password: postgres
 
   jpa:
     hibernate:

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn"
+             id="Definitions_highValueOrder"
+             name="highValueOrder"
+             namespace="http://camunda.org/schema/1.0/dmn"
+             exporter="Camunda Modeler"
+             exporterVersion="5.50.1">
+  <decision id="highValueOrderDecision" name="High Value Order Decision" camunda:historyTimeToLive="P180D">
+    <decisionTable id="DecisionTable_1" hitPolicy="UNIQUE">
+      <input id="Input_1" label="Total Amount">
+        <inputExpression id="InputExpression_1" typeRef="double">
+          <text>totalAmount</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="High Value Order" name="highValueOrder" typeRef="boolean" />
+      <rule id="Rule_1">
+        <inputEntry id="InputEntry_1">
+          <text>&gt;= 1000</text>
+        </inputEntry>
+        <outputEntry id="OutputEntry_1">
+          <text>true</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_2">
+        <inputEntry id="InputEntry_2">
+          <text>&lt; 1000</text>
+        </inputEntry>
+        <outputEntry id="OutputEntry_2">
+          <text>false</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
