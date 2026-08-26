@@ -3,7 +3,6 @@ package az.company.demo.service;
 import az.company.demo.dao.entity.Payment;
 import az.company.demo.dao.repository.PaymentRepository;
 import az.company.demo.model.enums.PaymentStatus;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,10 +10,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+
+    public PaymentService(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
+    }
 
     @Transactional(readOnly = true)
     public Payment getByOrderId(Long orderId) {

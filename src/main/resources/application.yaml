@@ -27,11 +27,10 @@ camunda:
       first-name: Admin
       last-name: User
       email: admin@example.com
-
-camunda.bpm.client:
-  base-url: http://localhost:8080/engine-rest
-  worker-id: order-service-worker
-  lock-duration: 10000
+    client:
+      base-url: http://localhost:8080/engine-rest
+      worker-id: order-service-worker
+      lock-duration: 10000
 
 server:
   port: 8080
