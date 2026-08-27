@@ -7,7 +7,6 @@ import az.company.demo.service.OrderService;
 import az.company.demo.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.camunda.bpm.client.spring.annotation.ExternalTaskSubscription;
 import org.camunda.bpm.client.task.ExternalTask;
 import org.camunda.bpm.client.task.ExternalTaskHandler;
 import org.camunda.bpm.client.task.ExternalTaskService;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ExternalTaskSubscription(topicName = "payment")
 public class PaymentExternalTaskWorker implements ExternalTaskHandler {
 
     private static final int MAX_RETRIES = 2;

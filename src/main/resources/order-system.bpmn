@@ -88,9 +88,13 @@
     </bpmn:serviceTask>
     <bpmn:intermediateCatchEvent id="Event_19bfbrp" name="Wait for Delivery">
       <bpmn:incoming>Flow_1kf33zz</bpmn:incoming>
-      <bpmn:outgoing>Flow_0betvd2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_toComplete</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1ohv5wu" messageRef="Message_2sjjt1b" />
     </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="Activity_completeOrder" name="Complete Order" camunda:delegateExpression="${completeOrderDelegate}">
+      <bpmn:incoming>Flow_toComplete</bpmn:incoming>
+      <bpmn:outgoing>Flow_0betvd2</bpmn:outgoing>
+    </bpmn:serviceTask>
     <bpmn:endEvent id="Event_0vcg5js" name="Order Completed">
       <bpmn:incoming>Flow_0betvd2</bpmn:incoming>
     </bpmn:endEvent>
@@ -127,8 +131,8 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_069miif" sourceRef="Activity_0uhoqic" targetRef="Activity_168e7k7" />
     <bpmn:sequenceFlow id="Flow_1kf33zz" sourceRef="Activity_168e7k7" targetRef="Event_19bfbrp" />
-    <bpmn:sequenceFlow id="Flow_0betvd2" sourceRef="Event_19bfbrp" targetRef="Event_0vcg5js" />
-  </bpmn:process>
+    <bpmn:sequenceFlow id="Flow_toComplete" sourceRef="Event_19bfbrp" targetRef="Activity_completeOrder" />
+    <bpmn:sequenceFlow id="Flow_0betvd2" sourceRef="Activity_completeOrder" targetRef="Event_0vcg5js" />  </bpmn:process>
   <bpmn:message id="Message_2sjjt1b" name="shipmentDelivered" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0diemk0">
@@ -214,10 +218,13 @@
           <dc:Bounds x="2310" y="285" width="81" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_completeOrder" bpmnElement="Activity_completeOrder">
+        <dc:Bounds x="2420" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0yr4xsg" bpmnElement="Event_0vcg5js">
-        <dc:Bounds x="2432" y="242" width="36" height="36" />
+        <dc:Bounds x="2572" y="242" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2408" y="285" width="85" height="14" />
+          <dc:Bounds x="2548" y="285" width="85" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_stockError" bpmnElement="Event_stockError">
@@ -355,9 +362,13 @@
         <di:waypoint x="2270" y="260" />
         <di:waypoint x="2332" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_1sg45ot" bpmnElement="Flow_0betvd2">
+      <bpmndi:BPMNEdge id="BPMNEdge_toComplete" bpmnElement="Flow_toComplete">
         <di:waypoint x="2368" y="260" />
-        <di:waypoint x="2432" y="260" />
+        <di:waypoint x="2420" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_1sg45ot" bpmnElement="Flow_0betvd2">
+        <di:waypoint x="2520" y="260" />
+        <di:waypoint x="2572" y="260" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

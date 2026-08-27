@@ -3,24 +3,20 @@ package az.company.demo.client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Mock implementation for demo/portfolio purposes.
- */
 @Slf4j
 @Component
-public class MockPaymentGatewayClient implements PaymentGatewayClient {
+public class MockShippingGatewayClient implements ShippingGatewayClient {
 
     private static final int SUCCESS_RATE_PERCENT = 100;
 
     @Override
-    public boolean charge(Long orderId, BigDecimal amount) {
+    public boolean dispatch(Long orderId) {
 
         boolean success = ThreadLocalRandom.current().nextInt(100) < SUCCESS_RATE_PERCENT;
 
-        log.info("Mock charging order {} for amount {} -> {}", orderId, amount, success ? "SUCCESS" : "DECLINED");
+        log.info("Mock dispatching shipment for order {} -> {}", orderId, success ? "SUCCESS" : "FAILED");
 
         return success;
     }

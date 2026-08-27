@@ -31,4 +31,25 @@ public class ShippingService {
                 .build();
         return shipmentRepository.save(shipment);
     }
+
+    @Transactional
+    public void markShipped(Long orderId) {
+        Shipment shipment = getExistingShipment(orderId);
+        shipment.setStatus(ShipmentStatus.SHIPPED);
+    }
+
+    @Transactional
+    public void markDelivered(Long orderId) {
+        Shipment shipment = getExistingShipment(orderId);
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+    }
+
+    private Shipment getExistingShipment(Long orderId) {
+        return shipmentRepository.findByOrderId(orderId)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Shipment not found for order: " + orderId
+                        )
+                );
+    }
 }
