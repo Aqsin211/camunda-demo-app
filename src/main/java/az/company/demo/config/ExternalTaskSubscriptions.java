@@ -2,9 +2,10 @@ package az.company.demo.config;
 
 import az.company.demo.worker.PaymentExternalTaskWorker;
 import az.company.demo.worker.ShippingExternalTaskWorker;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.client.ExternalTaskClient;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,7 +16,7 @@ public class ExternalTaskSubscriptions {
     private final PaymentExternalTaskWorker paymentExternalTaskWorker;
     private final ShippingExternalTaskWorker shippingExternalTaskWorker;
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void subscribe() {
         externalTaskClient
                 .subscribe("payment")
