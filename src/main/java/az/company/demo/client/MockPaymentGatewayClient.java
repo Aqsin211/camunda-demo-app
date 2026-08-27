@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Mock implementation for demo/portfolio purposes.
@@ -13,14 +12,12 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 public class MockPaymentGatewayClient implements PaymentGatewayClient {
 
-    private static final int SUCCESS_RATE_PERCENT = 100;
-
     @Override
     public boolean charge(Long orderId, BigDecimal amount) {
 
-        boolean success = ThreadLocalRandom.current().nextInt(100) < SUCCESS_RATE_PERCENT;
+        boolean success = true;
 
-        log.info("Mock charging order {} for amount {} -> {}", orderId, amount, success ? "SUCCESS" : "DECLINED");
+        log.info("Mock charging order {} for amount {} -> {}", orderId, amount, "SUCCESS");
 
         return success;
     }

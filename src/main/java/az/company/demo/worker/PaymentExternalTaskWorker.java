@@ -49,8 +49,6 @@ public class PaymentExternalTaskWorker implements ExternalTaskHandler {
         } catch (Exception e) {
             log.error("Unexpected error processing payment for order {}", orderId, e);
 
-            // getRetries() is null on first failure - Camunda defaults it from
-            // the BPMN retryTimeCycle if configured, otherwise treat as MAX_RETRIES.
             int remainingRetries = externalTask.getRetries() == null
                     ? MAX_RETRIES
                     : externalTask.getRetries() - 1;

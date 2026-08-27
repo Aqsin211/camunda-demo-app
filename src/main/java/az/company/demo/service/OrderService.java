@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -152,5 +153,9 @@ public class OrderService {
         Order order = getEntityById(orderId);
 
         order.setStatus(status);
+    }
+
+    public List<OrderResponse> getAllOrders() {
+        return orderRepository.findAll().stream().map(OrderMapper::toResponse).toList();
     }
 }
