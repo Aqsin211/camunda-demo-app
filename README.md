@@ -1,279 +1,268 @@
 # Camunda Order Processing Demo Application
 
-A demonstration of how to build an **automated order management system** using Camunda BPM workflow engine integrated with Spring Boot. This project shows a real-world example of orchestrating complex business processes involving order validation, inventory management, payment processing, and shipment coordination.
+An automated order management system using Camunda BPM workflow engine integrated with Spring Boot. This project demonstrates how to orchestrate complex business processes involving order validation, inventory management, payment processing, and shipment coordination.
+
+## Overview
+
+This application automates the complete order lifecycle from order placement through delivery. Camunda orchestrates each step, ensuring proper sequencing and handling issues like payment failures or insufficient inventory.
+
+### Process Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     ORDER PROCESSING WORKFLOW                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+Order Created
+    ↓
+Validate Order
+    ↓
+Check Stock Available?
+    ├─ NO  → Cancel Order → End
+    └─ YES → Continue
+    ↓
+Reserve Inventory
+    ├─ FAIL → Cancel Order → End
+    └─ SUCCESS → Continue
+    ↓
+Evaluate Order Value (High-value = > $5,000)
+    ├─ HIGH-VALUE → Finance Approval (Manual) → Approved?
+    │               ├─ NO → Cancel → End
+    │               └─ YES → Continue
+    └─ NORMAL-VALUE → Continue
+    ↓
+Prepare Payment
+    ↓
+Process Payment (External Gateway)
+    ├─ SUCCESS → Continue
+    └─ FAILED → Payment Review (Manual) → Approved?
+                 ├─ NO → Cancel → End
+                 └─ YES → Continue
+    ↓
+Prepare Shipment
+    ↓
+Ship Order (External Carrier)
+    ↓
+Wait for Delivery Confirmation (Webhook)
+    ↓
+Complete Order
+    ↓
+Order Complete/Cancelled ← End
+```
+
+## Prerequisites
+
+| Requirement | Version | Details |
+|---|---|---|
+| Java | 21+ | JDK 21 LTS or newer |
+| PostgreSQL | 13+ | Database server |
+| Gradle | 8.12+ | Included via wrapper (./gradlew) |
+| Git | Latest | Version control |
+| Disk Space | 500MB+ | For dependencies and database |
+
+## Why Camunda?
+
+Without a workflow engine, orchestrating this order process would require:
+- Complex conditional logic in code
+- Manual retry mechanisms for failures
+- State management across services
+- Custom approval interfaces
+- Manual tracking of where each order is
+
+Camunda provides:
+- Visual workflow definition (BPMN)
+- Automatic state management
+- Built-in error recovery
+- Ready-made approval UI
+- Complete audit trail
+- No code changes to modify process logic
+
+## Camunda vs Traditional Approach
+
+| Aspect | Traditional (if-else code) | Camunda BPM |
+|---|---|---|
+| Process Definition | Scattered in multiple files | Visual BPMN diagram, easy to modify |
+| State Tracking | Manual logging, custom queries | Built-in process instance tracking |
+| Error Handling | If-else blocks, manual retries | Automatic retry configuration |
+| Manual Steps | Custom forms and pages | Built-in Camunda Task UI |
+| Approval Logic | Hard-coded conditions | Visual gateways, easy to change thresholds |
+| Audit Trail | Application logs | Complete history in Camunda |
+| External System Delays | Blocks main thread | Async workers, non-blocking |
+| Monitoring | Custom dashboards | Camunda Cockpit built-in |
+| Changing Logic | Code change, recompile, redeploy | BPMN edit, reload (no code) |
+
+## What Was Built
+
+### REST API
+Endpoints to create orders, check status, and list orders. Order creation automatically starts the Camunda workflow and passes order details into the process.
+
+### Synchronous Operations
+Immediate tasks executed as the order flows through the workflow:
+- Order validation (checks for required data)
+- Stock availability checking
+- Inventory reservation
+- Payment and shipment preparation
+- Order status updates
 
-## What This Project Does
+### Asynchronous Workers
+Background tasks that process independently:
+- Payment processing with automatic 2x retry on failure (5-second delay)
+- Shipment coordination and tracking
 
-This application automates the complete order lifecycle - from the moment a customer places an order until it's delivered. Instead of having different systems handle each step independently, Camunda orchestrates the entire process, making sure each step happens in the right order and handling any issues that come up.
+### Business Rules
+Automatic determination of approval requirements. Orders exceeding $5,000 are flagged for Finance approval; smaller orders skip approval and proceed to payment.
 
-When an order is created, the system:
-1. Validates the order data
-2. Checks if products are in stock
-3. Reserves the inventory
-4. Evaluates if the order needs management approval (for high-value orders)
-5. Processes the payment through a payment gateway
-6. Prepares shipment details
-7. Ships the order
-8. Waits for delivery confirmation
-9. Marks the order as complete
+### Manual Approval Tasks
+Finance team logs into Camunda to approve high-value orders and failed payments through a task management interface.
 
-If anything goes wrong (like insufficient stock or payment failure), the order gets cancelled automatically.
+### Event Integration
+Webhook endpoint that receives delivery confirmations from shipping providers, triggering workflow continuation and order completion.
 
-## Why Use Camunda?
+## Tech Stack
 
-Without a workflow engine, handling this process would require:
-- Writing lots of conditional logic in code
-- Managing state across multiple services
-- Manually implementing retry logic for failures
-- Creating complex if-else chains
-- Tracking where each order is in the process
+- Camunda BPM 7.24.0 - Workflow and process automation platform
+- Spring Boot 3.5.5 - REST API and Camunda integration
+- PostgreSQL - Persistent database for orders and process state
+- Java 21 - Programming language
+- Gradle 8.12 - Build automation
 
-Camunda lets you define this process visually as a workflow diagram, then automatically executes it. The workflow engine handles:
-- **Process state management** - knows exactly where each order is
-- **Error recovery** - automatically retries failed tasks
-- **Multi-step orchestration** - manages the sequence of operations
-- **Human tasks** - Finance team can approve orders through a UI
-- **Business rules** - Apply logic like "orders over $5,000 need approval"
-- **Audit trail** - Complete history of every order
+## Quick Start
 
-## Technologies Used
+### 1. Prerequisites
 
-- **Camunda BPM** - Open source workflow engine that executes BPMN process diagrams
-- **Spring Boot** - Framework for building the REST API and integrating with Camunda
-- **PostgreSQL** - Database storing orders, inventory, and payment records
-- **Java 21** - Programming language
-- **Gradle** - Build tool
-
-## What I Built
-
-### REST API for Order Management
-
-Created endpoints that allow clients to:
-- Submit new orders to the system
-- Check order status
-- List all orders
-
-The order creation endpoint doesn't just save to the database - it also kicks off the Camunda workflow automatically, passing in key information like the order ID and total amount.
-
-### Database Models
-
-Designed data structures to store:
-- **Orders** - Customer orders with items and totals
-- **Order Items** - Individual products in each order with quantities
-- **Products** - Available products with pricing
-- **Payments** - Record of payment attempts and results
-- **Shipments** - Tracking shipment status
-
-### Synchronous Operations (Immediate Execution)
-
-Built operations that run right away as the order flows through the workflow:
-
-**Order Validation** - When order enters the process, validates it has items and valid data.
-
-**Stock Checking** - Checks if we have enough inventory for all items in the order. If stock is available, the process continues; if not, the order gets cancelled.
-
-**Stock Reservation** - Once approved, actually reserves the inventory so it can't be sold to another customer. If reservation fails, the order is cancelled.
-
-**Payment Preparation** - Sets up the payment information before charging the customer.
-
-**Shipment Preparation** - Prepares shipping details and labels.
-
-**Order Completion** - Updates the order status to completed when delivery confirmation arrives.
-
-### Asynchronous Operations (Background Processing)
-
-Built background workers that process tasks independently:
-
-**Payment Processing Worker** - Handles the actual charge to the payment gateway. If the payment fails, it automatically retries up to 2 times with a 5-second delay between attempts. This is separate from the main workflow, so if the payment gateway is slow, it doesn't block other orders.
-
-**Shipping Worker** - Coordinates with the shipping system. Creates shipment records and monitors their progress.
-
-### Business Rules Engine
-
-Set up business rules to automatically determine if an order needs management approval. The rule is simple: any order over $5,000 gets flagged as high-value and requires Finance approval before payment. Orders under that amount skip the approval step and go straight to payment.
-
-### Manual Approval Workflow
-
-For high-value orders and failed payments, Finance team members can log into the system and approve or reject them through a task management interface. The workflow pauses at these steps waiting for human decision.
-
-### Event-Based Communication
-
-Implemented a webhook endpoint that receives shipment delivery confirmations from the shipping provider. When a shipment is delivered, the system sends a message into the workflow to continue processing and mark the order as complete.
-
-## How It Works - The Flow
-
-1. **Customer places order** via API → OrderController saves it to database and starts Camunda workflow
-
-2. **Validation step** → ValidateOrderDelegate checks order has items
-
-3. **Stock check** → CheckStockDelegate queries inventory to see if products are available
-   - If stock available → Continue to next step
-   - If stock unavailable → Skip ahead to cancellation
-
-4. **Stock reservation** → ReserveStockDelegate marks inventory as reserved
-   - If reservation succeeds → Continue
-   - If reservation fails (error boundary) → Cancel order
-
-5. **Evaluate order value** → Business rule checks order total
-   - If over $5,000 (high-value) → Route to Finance approval
-   - If under $5,000 → Skip approval
-
-6. **Finance approval** (for high-value orders only) → Pauses workflow, Finance team reviews and approves/rejects via Camunda UI
-   - If approved → Continue to payment
-   - If rejected → Cancel order
-
-7. **Prepare payment** → PreparePaymentDelegate sets up payment details
-
-8. **Process payment** → PaymentExternalTaskWorker calls payment gateway
-   - If successful → Continue
-   - If failed → Go to payment review
-
-9. **Payment review** (if payment failed) → Finance reviews failed payment, can manually approve proceeding or cancel
-
-10. **Prepare shipment** → PrepareShipmentDelegate gets shipment info ready
-
-11. **Ship order** → ShippingExternalTaskWorker coordinates with shipping provider
-
-12. **Wait for delivery** → Workflow pauses, waiting for webhook notification
-
-13. **Delivery confirmation arrives** → Webhook endpoint receives notification and resumes workflow
-
-14. **Complete order** → CompleteOrderDelegate marks order as completed
-
-15. **Order is done** → End event, order fully processed
-
-Throughout this entire flow, if anything goes wrong, the system either retries automatically (for payment) or pauses for human review (for approvals).
-
-## Key Features
-
-**Automated workflow** - No code needed to manage the process flow; it's defined visually in BPMN diagram
-
-**Error recovery** - Payment failures automatically retry; other errors pause for manual review
-
-**Human approvals** - Finance team reviews high-value orders and payment issues through UI
-
-**Business rules** - Simple rules like approval thresholds defined separately from code
-
-**Audit trail** - Complete history of every order and every step it went through
-
-**Decoupled services** - Payment and shipping are handled asynchronously, so slow external services don't block other orders
-
-**Webhook integration** - Receive updates from external systems (like shipping providers) and continue processing
-
-## How to Run It
-
-### Setup
-
-1. Install PostgreSQL and create a database called `camunda_demo`
-
-2. Update the database credentials in `application.yaml` with your PostgreSQL username and password
-
-3. Build the project:
-   ```bash
-   ./gradlew clean build
-   ```
-
-4. Run it:
-   ```bash
-   ./gradlew bootRun
-   ```
-
-### Using the System
-
-Once running on http://localhost:8080:
-
-**Create an order:**
 ```bash
+# Check Java version (should be 21+)
+java -version
+
+# Create PostgreSQL database
+createdb camunda_demo
+```
+
+### 2. Configure Database
+
+Edit `src/main/resources/application.yaml`:
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/camunda_demo
+    username: postgres
+    password: your_password
+```
+
+### 3. Build and Run
+
+```bash
+# Build
+./gradlew clean build
+
+# Run
+./gradlew bootRun
+```
+
+Application starts at http://localhost:8080
+
+### 4. Test
+
+```bash
+# Create an order
 curl -X POST http://localhost:8080/api/orders \
   -H "Content-Type: application/json" \
-  -d '{
-    "customerId": 1,
-    "items": [
-      {"productId": 1, "quantity": 2}
-    ]
-  }'
-```
+  -d '{"customerId": 1, "items": [{"productId": 1, "quantity": 2}]}'
 
-**View order status:**
-```bash
+# View order
 curl http://localhost:8080/api/orders/1
+
+# Monitor workflow
+# Browser: http://localhost:8080/camunda (admin / admin)
 ```
 
-**Monitor in Camunda Cockpit** - Open browser to http://localhost:8080/camunda
+## Using the System
+
+**Camunda Cockpit** - Process Monitoring
+- URL: http://localhost:8080/camunda
 - Login: admin / admin
-- See all running orders
-- View which step each order is at
-- See process variables and history
+- View all orders, track progress, inspect process variables
 
-**Approve high-value orders** - Finance team logs into http://localhost:8080/camunda/app/tasklist/
-- See tasks awaiting approval
-- Review order details
-- Click approve or reject
+**Task List** - Manual Approvals
+- URL: http://localhost:8080/camunda/app/tasklist/
+- Finance team approves high-value orders and payment reviews
 
-**See API documentation** - http://localhost:8080/swagger-ui.html
-- All available endpoints
-- Request/response examples
-- Try endpoints directly
+**API Documentation**
+- URL: http://localhost:8080/swagger-ui.html
+
+## How It Works
+
+1. Customer submits order via API
+2. Order saved to database, Camunda workflow starts with order ID
+3. Validation checks order has items
+4. Stock check determines if inventory available
+5. If stock available, inventory reserved
+6. Order value evaluated: High-value orders require Finance approval
+7. If approved (or not high-value), payment is prepared
+8. Payment gateway charges customer with automatic retry on failure
+9. If payment succeeds, shipment is prepared
+10. Shipping carrier notified
+11. Workflow waits for delivery webhook
+12. Delivery confirmation received via webhook
+13. Order marked complete
+
+If any step fails (insufficient stock, payment error), the order is cancelled or paused for manual review depending on the issue.
 
 ## Project Structure
 
-The code is organized by responsibility:
+```
+src/main/java/az/company/demo/
+├── controller/          REST endpoints for orders, products, webhooks
+├── service/             Business logic (orders, inventory, payments, shipping)
+├── delegate/            Synchronous workflow tasks (validation, reservations)
+├── worker/              Asynchronous background workers (payment, shipping)
+├── dao/                 Database entities and repositories
+├── model/               Data transfer objects
+├── exception/           Custom exceptions
+├── config/              Spring and Camunda configuration
+├── process/             Process variable constants
+└── client/              External service clients
 
-**Controllers** - Handle incoming HTTP requests for orders, products, and webhooks
+src/main/resources/
+├── application.yaml     Configuration file
+├── order-system.bpmn    Process definition
+└── high-value-order.dmn Business rules
+```
 
-**Services** - Contains business logic for orders, inventory, payments, and shipping
+## Key Design Patterns
 
-**Delegates** - Run immediately when the workflow reaches them (validation, stock checks, order updates)
+**Delegates** - Synchronous tasks executing immediately in the workflow
+**External Workers** - Asynchronous tasks with retry logic for external services
+**Process Variables** - Context data flowing through the workflow
+**Business Rules** - DMN for declaring approval thresholds without code
+**Error Boundaries** - Graceful failure handling with alternative paths
+**Message Events** - Webhook integration for external system communication
 
-**Workers** - Run in background for long-running operations (payment processing, shipping tracking)
+## Common Use Cases
 
-**Database** - Entities and repositories for storing and retrieving data
+This order processing pattern applies to:
+- Loan approval (validate → check credit → approve → disburse)
+- Leave requests (request → manager approval → HR process → confirm)
+- Support tickets (create → assign → resolve → close)
+- Document processing (upload → scan → validate → store)
+- Expense claims (submit → manager review → approve → reimburse)
+- Onboarding (register → email → verify → create account)
 
-**Models** - Data transfer objects for API requests and responses
+## Learning Outcomes
 
-**Configuration** - Camunda and Spring Boot settings
-
-## What Makes This a Good Example
-
-**Real-world scenario** - Order processing is something most e-commerce systems need
-
-**Covers core patterns** - Shows synchronous tasks, asynchronous workers, manual approval, business rules, error handling, webhooks
-
-**Scalable approach** - The pattern can be adapted for other workflows (loan processing, support tickets, leave requests, etc.)
-
-**Production-ready** - Error handling, retry logic, database transactions, and audit trails are all implemented
-
-**Clean architecture** - Code is organized by responsibility, not by technical layer
-
-**Demonstrates integration** - Shows how Camunda fits into a Spring Boot application with real databases and external services
-
-## Common Use Cases for This Pattern
-
-Once you understand this pattern, you can adapt it for:
-
-- **Loan approval** - Validate application → Check credit → Get approval → Disburse funds
-- **Support tickets** - Create ticket → Assign to team → Track progress → Close
-- **Leave requests** - Employee requests → Manager approves → HR processes → Send confirmation
-- **Document processing** - Upload → Scan → Extract data → Validate → Store
-- **Onboarding** - Register user → Send email → Verify → Create account → Send welcome
-- **Claims processing** - Submit claim → Validate → Investigate → Approve/deny → Pay
-
-The structure and concepts stay the same; just the specific business logic changes.
-
-## What You Learn From This Project
-
-- How to model business processes as workflows
-- How to integrate Camunda with Spring Boot
-- When to use synchronous vs asynchronous task execution
-- How to implement error recovery and retry logic
-- How to add manual approval steps to automated processes
-- How to apply business rules dynamically
-- How to track and audit complex processes
-- How to handle webhooks and external events
-- Database design for process-oriented applications
-- Building REST APIs that start workflows
+Understanding this project teaches:
+- How to model business processes as executable workflows
+- Integration of Camunda with Spring Boot applications
+- Synchronous vs asynchronous task execution patterns
+- Error recovery and retry strategies
+- Building manual approval workflows
+- Dynamic business rule application
+- Process state management and audit trails
+- Webhook handling and external system integration
+- Database design for workflow applications
+- REST API design for process orchestration
 
 ---
 
-**Author:** Aqsin211  
-**Purpose:** Learning and demonstration of Camunda BPM patterns
+**Author:** Aqsin211
+**Repository:** https://github.com/Aqsin211/camunda-demo-app
