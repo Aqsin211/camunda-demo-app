@@ -58,6 +58,24 @@ Order Complete/Cancelled ← End
 | PostgreSQL | 13+ | Database server |
 | Gradle | 8.12+ | Included via wrapper (./gradlew) |
 | Git | Latest | Version control |
+| Disk Space | 500MB+ | For dependencies and database |
+
+## Why Camunda?
+
+Without a workflow engine, orchestrating this order process would require:
+- Complex conditional logic in code
+- Manual retry mechanisms for failures
+- State management across services
+- Custom approval interfaces
+- Manual tracking of where each order is
+
+Camunda provides:
+- Visual workflow definition (BPMN)
+- Automatic state management
+- Built-in error recovery
+- Ready-made approval UI
+- Complete audit trail
+- No code changes to modify process logic
 
 ## Camunda vs Traditional Approach
 
@@ -92,7 +110,7 @@ Background tasks that process independently:
 - Shipment coordination and tracking
 
 ### Business Rules
-Automatic determination of approval requirements. Orders exceeding $1,000 are flagged for Finance approval; smaller orders skip approval and proceed to payment.
+Automatic determination of approval requirements. Orders exceeding $5,000 are flagged for Finance approval; smaller orders skip approval and proceed to payment.
 
 ### Manual Approval Tasks
 Finance team logs into Camunda to approve high-value orders and failed payments through a task management interface.
@@ -113,7 +131,7 @@ Webhook endpoint that receives delivery confirmations from shipping providers, t
 ### 1. Prerequisites
 
 ```bash
-# Check Java version
+# Check Java version (should be 21+)
 java -version
 
 # Create PostgreSQL database
@@ -213,12 +231,29 @@ src/main/resources/
 
 ## Key Design Patterns
 
-**Delegates** - Synchronous tasks executing immediately in the workflow
-**External Workers** - Asynchronous tasks with retry logic for external services
-**Process Variables** - Context data flowing through the workflow
-**Business Rules** - DMN for declaring approval thresholds without code
-**Error Boundaries** - Graceful failure handling with alternative paths
-**Message Events** - Webhook integration for external system communication
+**Delegates**
+
+Synchronous tasks executing immediately in the workflow
+
+**External Workers**
+
+Asynchronous tasks with retry logic for external services
+
+**Process Variables**
+
+Context data flowing through the workflow
+
+**Business Rules**
+
+DMN for declaring approval thresholds without code
+
+**Error Boundaries**
+
+Graceful failure handling with alternative paths
+
+**Message Events**
+
+Webhook integration for external system communication
 
 ## Common Use Cases
 
@@ -230,7 +265,22 @@ This order processing pattern applies to:
 - Expense claims (submit → manager review → approve → reimburse)
 - Onboarding (register → email → verify → create account)
 
+## Learning Outcomes
+
+Understanding this project teaches:
+- How to model business processes as executable workflows
+- Integration of Camunda with Spring Boot applications
+- Synchronous vs asynchronous task execution patterns
+- Error recovery and retry strategies
+- Building manual approval workflows
+- Dynamic business rule application
+- Process state management and audit trails
+- Webhook handling and external system integration
+- Database design for workflow applications
+- REST API design for process orchestration
+
 ---
 
 **Author:** Aqsin211
+
 **Repository:** https://github.com/Aqsin211/camunda-demo-app
